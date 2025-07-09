@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
     }
 
     // implement the UTF-8 analyzer here
-    if (is_ascii(argv[1]) == 0) {
+    if (is_ascii(argv[1]) == 1) {
                 printf("Valid ASCII: true\n");
         } else {
                 printf("Valid ASCII: false\n");
