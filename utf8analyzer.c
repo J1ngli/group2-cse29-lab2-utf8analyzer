@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define MAX_DEFINE 2048
+
 int utf8_char_length(unsigned char byte) {
     if (byte < 0x80) return 1;
     if (byte < 0xC0) return 0;
@@ -135,7 +137,92 @@ void capitalize_ascii(char str[]) {
     printf("Uppercased ASCII: %s\n", str);
 }
 
+int codepoint_number(char str[])
+{
+        unsigned int count = 0;
+        unsigned int index = 0;
+
+        while(str[index] != '\0')
+        {
+                if((str[index] & 0b11000000) != 0b10000000)
+                {
+                        count++;
+                }
+                index++;
+        }
+
+        return count - 1; // account for enter key
+}
+
+void to_dec(char str[])
+{
+        uint32_t dec = 0;
+        int index = 0;
+
+        printf("Decimal of each codepoint: ");
+
+        while(str[index] != '\0')
+        {
+                if((str[index] & 0x80) == 0x0)
+                {
+                        dec = str[index];
+                        index++;
+                }
+                else if((str[index] & 0xE0) == 0xC0)
+                {
+                        dec = ((str[index] & 0x1F) << 6) | (str[index + 1]);
+                        index += 2;
+                }
+                else if((str[index] & 0xF0) == 0xE0)
+                {
+                        dec = ((str[index] & 0x0F) << 12) | ((str[index + 1] & 0x3F) << 6) | str[index + 2];
+                        index += 3;
+                }
+                else if((str[index] & 0xF8) == 0xF0)
+                {
+                        dec = ((str[index] & 0x7) << 18) | ((str[index + 1] & 0x3F << 12)) | ((str[index + 2] & 0x3F) << 6) | str[index + 3];
+                        index += 4;
+                }
+                printf("%u ", dec);
+        }
+        printf("\n");
+}
+
+int num_bytes(char str[])
+{
+        int count, index = 0;
+
+        printf("Bytes of each codepoint: ");
+
+        while(str[index] != '\0')
+        {
+                count = 0;
+                if((str[index] & 0x80) == 0x0)
+                {
+                        count++;
+                        index++;
+                }
+                else if((str[index] & 0xE0) == 0xC0)
+                {
+                        count += 2;
+                        index += 2;
+                }
+                else if((str[index] & 0xF0) == 0xE0)
+                {
+                        count += 3;
+                        index += 3;
+                }
+                else if((str[index] & 0xF8) == 0xF0)
+                {
+                        count += 4;
+                        index += 4;
+                }
+                printf("%u ", count);
+        }
+}
+
 int main(int argc, char* argv[]) {
+
     if (argc != 2) {
         fprintf(stderr, "Usage: utf8analyzer \"<UTF-8 encoded string>\"\n");
         return 1;
@@ -179,6 +266,11 @@ int main(int argc, char* argv[]) {
     } else {
         printf("Codepoint at index 3 incremented: (not found or error)\n");
     }
+
+    printf("Number of codepoints: %u\n", codepoint_number(*argv));
+    to_dec(*argv);
+    num_bytes(*argv);
+	
 
     return 0;
 }
